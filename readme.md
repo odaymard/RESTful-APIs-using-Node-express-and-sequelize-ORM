@@ -44,17 +44,19 @@ We have three databases:
   run the following sequelize command in the terminal for creating testing and development databases.
 
 ```
-.\node_modules\.bin\sequelize db:create --url mysql://root:root@loca
+.\node_modules\.bin\sequelize db:create --url mysql://username:password@loca
 lhost/devdatabase
 ```
 
 
 ```
-.\node_modules\.bin\sequelize db:create --url mysql://root:root@loca
+.\node_modules\.bin\sequelize db:create --url mysql://username:password@loca
 lhost/testdatabase
 ```
 
+Note:change username and password by yours 
 
+by default the username and password is root,root
 
 ## Running
 
