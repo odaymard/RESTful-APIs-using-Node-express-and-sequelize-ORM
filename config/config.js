@@ -7,15 +7,12 @@ module.exports = {
     dialect:'mysql'
   },
   test: {
-    use_env_variable:'DATABASE_URL_TEST',
-    databaseName:'DATABASE_TEST',
-    
+    use_env_variable:'DATABASE_URL_TEST',  
     dialect:'mysql'
   },
   production: {
     use_env_variable:'DATABASE_URL',
-    
-    dialect:'mysql',
+    dialect:'mysql'
   }
 };
 
