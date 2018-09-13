@@ -49,7 +49,7 @@ lhost/devdatabase
 lhost/testdatabase
 ```
 
-Note:change username and password by yours 
+Note:change username and password to yours 
 
 by default the username and password are root,root
 
