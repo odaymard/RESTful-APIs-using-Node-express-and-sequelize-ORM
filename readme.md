@@ -11,8 +11,8 @@
 - [Getting started](#getting-started)
   - [Configuring environment variables](#configuring-environment-variables)
   - [Installing dependencies](#installing-dependencies)
-- [Runing](##Running)  
-- [Tests](##testing)
+- [Running](#running)  
+- [Tests](#testing)
 
 
 ## Requirements
