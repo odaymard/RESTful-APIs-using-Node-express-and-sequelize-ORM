@@ -1,4 +1,4 @@
-var dotenv = require('dotenv');
+const dotenv = require('dotenv');
 dotenv.load();
 
 module.exports = {
@@ -8,13 +8,10 @@ module.exports = {
   },
   test: {
     use_env_variable:'DATABASE_URL_TEST',
-    databaseName:'DATABASE_TEST',
-    
     dialect:'mysql'
   },
   production: {
-    use_env_variable:'DATABASE_URL',
-    
+    use_env_variable:'DATABASE_URL',    
     dialect:'mysql',
   }
 };

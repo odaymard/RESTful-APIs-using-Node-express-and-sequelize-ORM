@@ -1,9 +1,6 @@
 //During the test the env variable is set to test
 process.env.NODE_ENV = "test";
-
-
 const chai = require("chai");
-
 const chaiHttp = require("chai-http");
 const server = require("../app");
 const expect = chai.expect;
@@ -11,14 +8,7 @@ const database = require("../models/database");
 const machines = require("../models/machine").machines;
 
 chai.use(chaiHttp);
-
 before(async function() {
-  await machines.destroy({
-    truncate: true,
-    force: true,
-    individualHooks: true,
-    logging: true
-  });
   await machines.create({
     name: "machinetest1",
     description: "machinetest1description",
@@ -36,7 +26,7 @@ before(async function() {
   });
 });
 
-describe("GET /machines", done => {
+describe("GET /machines", function() {
   it("should send an array of machines", done => {
     chai
       .request(server)
@@ -45,14 +35,14 @@ describe("GET /machines", done => {
         expect(res.status).to.equal(200);
         expect(res).to.be.json;
         expect(res.body).to.be.an("array");
+        expect(res.body).length(3);
+
         done();
       });
   });
-});
 
-describe("GET /machines", done => {
-  const machineId = 1;
   it("should send a specific machine if it exists", done => {
+    const machineId = 2;
     chai
       .request(server)
       .get("/machines/" + machineId)
@@ -60,17 +50,18 @@ describe("GET /machines", done => {
         expect(res.status).to.equal(200);
         expect(res).to.be.json;
         expect(res.body).to.be.a("object");
+        expect(res.body.name).to.eq("machinetest2");
+        expect(res.body.description).to.eq("machinetest2description");
+        expect(res.body.id).to.eq(2);
 
         done();
       });
   });
-});
 
-describe("GET /machines", done => {
   it("should not send a machine if it does not exist", done => {
     chai
       .request(server)
-      .get("/machines/8")
+      .get("/machines/1000")
       .end((err, res) => {
         expect(res.status).to.equal(404);
         expect(res).to.be.string;
@@ -91,7 +82,8 @@ describe("Create a machine", function() {
         expect(err).to.be.null;
         expect(res).to.have.status(201);
         machines
-          .findOne({ where: { name: "createdmachine2" } })
+          //4 is the new created machine ID
+          .findById(4)
           .then(machine => {
             expect(machine.name).equal("createdmachine2");
           })
@@ -114,18 +106,33 @@ describe("update a machine", function() {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
         machines
-          .findOne({ where: { name: "updatedmachinename" } })
+          .findById(1)
           .then(machine => {
             expect(machine.name).equal("updatedmachinename");
+            expect(machine.description).equal("updatedmachinedescription");
           })
           .then(done, done);
+      });
+  });
+  it("should not update a machine if not exists", function(done) {
+    const machineId = 1000;
+    chai
+      .request(server)
+      .patch("/machines/" + machineId)
+      .send({
+        name: "updatedmachinename",
+        description: "updatedmachinedescription"
+      })
+      .end(function(err, res) {
+        expect(res).to.have.status(404);
+        done();
       });
   });
 });
 
 describe("delete a machine", function() {
   it("should delete a specific machine", function(done) {
-    const machineId = 1;
+    const machineId = 2;
     chai
       .request(server)
       .del("/machines/" + machineId)
@@ -139,5 +146,24 @@ describe("delete a machine", function() {
           })
           .then(done, done);
       });
+  });
+
+  it("should not delete a machine if not exists", function(done) {
+    const machineId = 10000;
+    chai
+      .request(server)
+      .del("/machines/" + machineId)
+      .end(function(err, res) {
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
+});
+
+after(async function() {
+  await machines.truncate({
+    force: true,
+    individualHooks: true,
+    logging: true
   });
 });

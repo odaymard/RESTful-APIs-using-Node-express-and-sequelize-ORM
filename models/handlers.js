@@ -1,9 +1,10 @@
-//const moment = require("moment");
 const database = require("./database");
 const machines = require("./machine.js").machines;
+const helper = require("../helper/helper");
 
-async function createMachinehandler(req, res) {
-  let machine = req.body;
+async function createMachine(req, res) {
+  const machine = req.body;
+
   try {
     let newMachine = await machines.create(machine);
     res.status(201).json({
@@ -11,95 +12,53 @@ async function createMachinehandler(req, res) {
       newMachine
     });
   } catch (err) {
-    res.status(500).json({
-      status_code: 500,
-      status_message: "internal server error",
-      err: err.message
-    });
+    helper.serverError(err, res);
   }
 }
 
-async function getMachinesHandler(req, res) {
-  try {
-    let page = parseInt(req.query.page, 10);
-    let orderby;
-    let direction;
-    let offset;
-    let limit;
-    const filter = {};
-    if (isNaN(page) || page < 1) {
-      page = 1;
-    }
-    limit = parseInt(req.query.limit, 10);
-    if (isNaN(limit)) {
-      limit = 10;
-    } else if (limit > 50) {
-      limit = 50;
-    } else if (limit < 1) {
-      limit = 1;
-    }
-    offset = (page - 1) * limit;
+async function getMachines(req, res) {
+  const {
+    direction = "asc",
+    order = "id",
+    name,
+    type,
+    description
+  } = req.query;
+  const limit = helper.getLimit(req.query.limit);
+  const filter = helper.getFilter(req.query);
+  const page = helper.getPage(req.query.page);
+  const offset = (page - 1) * limit;
 
-    if (req.query.orderby) {
-      orderby = req.query.orderby;
-    } else {
-      orderby = `id`;
-    }
-    if (req.query.direction) {
-      direction = req.query.direction;
-    } else {
-      direction = "asc";
-    }
-    if (req.query.name) {
-      filter["name"] = req.query.name;
-    }
-    if (req.query.type) {
-      filter["type"] = req.query.type;
-    }
-    if (req.query.description) {
-      filter["description"] = req.query.description;
-    }
+  try {
     const result = await machines.findAll({
       limit: limit,
       offset: offset,
-      order: [[orderby, direction]],
+      order: [[order, direction]],
       where: filter
     });
-    if (result) {
+    if (result.length) {
       res.send(result);
     } else {
-      res.status(404).json({
-        status_message: "resources not found "
-      });
+      helper.notFound(res);
     }
   } catch (err) {
-    res.status(500).json({
-      status_code: 500,
-      status_message: "internal server error",
-      err: err.message
-    });
+    helper.serverError(err, res);
   }
 }
 
-async function getMachineByIdHandler(req, res) {
+async function getMachineById(req, res) {
   const id = req.params.id;
+
   try {
     const result = await machines.findById(id);
     if (result) {
       res.send(result);
-    } else
-      res.status(404).json({
-        status_message: "resources not found "
-      });
+    } else helper.notFound(res);
   } catch (err) {
-    res.status(500).json({
-      status_code: 500,
-      status_message: "internal server error",
-      err: err.message
-    });
+    helper.serverError(err, res);
   }
 }
-async function updateMachineHandler(req, res) {
+async function updateMachine(req, res) {
   const machineId = req.params.id;
   const newMachineEntry = req.body;
 
@@ -109,46 +68,36 @@ async function updateMachineHandler(req, res) {
         id: machineId
       }
     });
+    console.log(updatedRow);
     if (updatedRow == 1) {
       res.status(200).json("record updated succesfuly");
     } else {
-      res.status(404).json({
-        status_message: "resources not found "
-      });
+      helper.notFound(res);
     }
   } catch (err) {
-    res.status(500).json({
-      status_code: 500,
-      status_message: "internal server error",
-      err: err.message
-    });
+    helper.serverError(err, res);
   }
 }
 
-async function deleteMachineHandler(req, res) {
+async function deleteMachine(req, res) {
   const id = req.params.id;
+
   try {
-    const element = await machines.destroy({ where: { id: id } });
-    if (element == 1) {
+    const element = await machines.destroy({ where: { id } });
+    if (element === 1) {
       res.json("record deleted successfully");
     } else {
-      res.status(404).json({
-        status_message: "resources not found "
-      });
+      helper.notFound(res);
     }
   } catch (err) {
-    res.status(500).json({
-      status_code: 500,
-      status_message: "internal server error",
-      err: err.message
-    });
+    helper.serverError(err, res);
   }
 }
 
 module.exports = {
-  createMachinehandler,
-  getMachinesHandler,
-  getMachineByIdHandler,
-  updateMachineHandler,
-  deleteMachineHandler
+  createMachine,
+  getMachines,
+  getMachineById,
+  updateMachine,
+  deleteMachine
 };

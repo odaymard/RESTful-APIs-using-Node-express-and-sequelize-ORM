@@ -14,6 +14,7 @@ const machines = db.define(
     paranoid: true
   }
 );
+
 machines.sync({ force: false });
 
 module.exports = { machines };
